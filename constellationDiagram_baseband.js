@@ -123,31 +123,14 @@ function constellationDiagram_Baseband(){
       }
 
       console.log(varPosTarget)
-
-      svg.append("path")
-      .datum(varPosTarget)
-      .attr("fill", "none")
-      .attr("stroke", "#FF0000")
-      .attr("stroke-width", 3)
-      .attr("d", d3.line()
-        .x(function(d) { return x(d.x) })
-        .y(function(d) { return y(d.y) })
-        )
-        svg.append("path")
-        .datum(varNegTarget)
-        .attr("fill", "none")
-        .attr("stroke", "#0000FF")
-        .attr("stroke-width", 3)
-        .attr("d", d3.line()
-          .x(function(d) { return x(d.x) })
-          .y(function(d) { return y(d.y) })
-          )
   
       // console.log(ebno);
         counter = counter + 1;
         if (counter == 9){
           counter = 0;
           d3.select("#constellationParent").selectAll("circle").remove();
+          d3.select("#constellationParent").selectAll("path").remove();
+
           svg.append('g')
           .selectAll("dot")
           .data(positiveTarget)
@@ -226,6 +209,25 @@ function constellationDiagram_Baseband(){
               .style("fill","#00FF00")
             }
 
+        svg.append("path")
+        .datum(varPosTarget)
+        .attr("fill", "none")
+        .attr("stroke", "#FF0000")
+        .attr("stroke-width", 3)
+        .attr("d", d3.line()
+          .x(function(d) { return x(d.x) })
+          .y(function(d) { return y(d.y) })
+          )
+          svg.append("path")
+          .datum(varNegTarget)
+          .attr("fill", "none")
+          .attr("stroke", "#0000FF")
+          .attr("stroke-width", 3)
+          .attr("d", d3.line()
+            .x(function(d) { return x(d.x) })
+            .y(function(d) { return y(d.y) })
+            )
+
         // value below is the loop time in miliseconds
     }, 1000);
   
@@ -236,13 +238,22 @@ function constellationDiagram_Baseband(){
 
 
     sig.onChange("gn", update_constellation);
+    sig.onChange("differentialMode", update_constellation);
+    
   
     function update_constellation(){
       let NewY = sig.gn
+      if(sig.differentialMode){
       positiveTarget = [
         { x: 1, y: NewY },
         { x: -1, y: NewY },
       ]
+    } else {
+      positiveTarget = [
+        { x: 1, y: 0 },
+        { x: -1, y: 0 },
+      ]
+    }
       negativeTarget = [
         { x: 1, y: -NewY },
         { x: -1, y: -NewY },
