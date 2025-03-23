@@ -20,6 +20,14 @@
 
 <button onclick="buttonPressedClearPoints()">clear message</button> 
 
+<div style="display:inline-flex;">
+  <span style="font-size: 18px; margin-left: 8px;margin-right: 8px;">Differential Mode</span>
+  <label class="switch">
+    <input id="differentialMode" type="checkbox" onclick="differentialMode();">
+    <span class="slider round"></span>
+  </label>
+</div>
+
 <div id="constellationParent" style="width: 100%; height: 100%;"></div>
 
 
@@ -35,6 +43,7 @@ var sig = Signal(JSON.parse(JSON.stringify(conf.signal_multi)), '', {
     gn_min: 0, // volts
     gn_max: 5, // volts
     mcs_init: 1, // array index int
+    differentialMode: false,
   });
   var noise = Signal(JSON.parse(JSON.stringify(conf.signal_multi)), '', {
     gn_init: 0, // dB
@@ -153,9 +162,18 @@ constellationDiagram_Baseband()
 function buttonPressedClearPoints(){
   d3.select("#constellationParent").selectAll("circle").remove();
   d3.select("#constellationParent").selectAll("path").remove();
-
-
 }
+function differentialMode(){
+  if(document.getElementById("differentialMode").checked){
+    sig.differentialMode = true;
+  }else{
+    sig.differentialMode = false;
+  }
+  buttonPressedClearPoints();
+  sig.gn = sig.gn + 0.0001;
+  sig.gn = sig.gn - 0.0001;
+
+  }
 
 
 </script>
