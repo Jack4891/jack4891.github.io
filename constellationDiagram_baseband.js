@@ -1,19 +1,13 @@
 function constellationDiagram_Baseband(){
     document.getElementById("constellationParent").innerHTML = "";
   
-    // delcared for 16 qam as signal is also declared as 16 qam
-    let positiveTarget = [
-                      { x: -1, y: 0 },
-                  ];
-    let negativeTarget = [
-                    { x: -1, y: 0 },
-                ];
+
 
   
         // set the dimensions and margins of the graph
         const margin = {top: 10, right: 30, bottom: 30, left: 60},
-                width = 460 - margin.left - margin.right,
-                height = 200 - margin.top - margin.bottom;
+                width = 250 - margin.left - margin.right,
+                height = 400 - margin.top - margin.bottom;
   
         // append the svg object to the body of the page
         var svg = d3.select("#constellationParent")
@@ -25,45 +19,58 @@ function constellationDiagram_Baseband(){
           svg.append("rect")
           .attr("x",0)
           .attr("y",0)
-          .attr("height", height )
+          .attr("height", height  )
           .attr("width", width )
           .style("fill", "EBEBEB")
 
-            
         // Add X axis
         var x = d3.scaleLinear()
-          .domain([-12, 12])
-          .range([ -.001, width * 1.01 ]);
+            .domain([-1.2, 1.2])         
+            .range([-.001, width * 1.01]);
         svg.append("g")
           // sends the line to the bottom
-          .attr("transform", "translate(0," + height + ")")
+          .attr("transform", "translate(0," + height +")")
           // make grid lines
-          .call(d3.axisBottom(x).tickSize(-height*1).ticks(7))
+          .call(d3.axisBottom(x).tickSize(-height*1).ticks(4))
+          .select(".domain").remove
   
-        // Add Y axis
-        // var y = d3.scaleLinear()
-        //   .domain([-1.5, 1.5])
-        //   .range([ height, 0]);
-        // Create the scale
-        var y = d3.scalePoint()
-            .domain(["Vol"])         // This is what is written on the Axis: from 0 to 100
-            .range([0, height]);       // This is where the axis is placed: from 100 px to 800px
+
+        // Add Y axis 
+        var y = d3.scaleLinear()
+            // .domain(["Vol"])         
+            // .range([0, height]);       
+            .domain([-6, 6])
+            .range([ -.001, height]);
         svg.append("g")
           // make grid lines
-          .call(d3.axisLeft(y).tickSize(-width*1).ticks(7))
+          .call(d3.axisLeft(y).tickSize(-height*1).ticks(7))
           // stroke lines
           svg.selectAll(".tick line").attr("stroke", "#484848")
   
+  // TODO ADD A TIME TO TEXT THATS SAME COLOR AS AXIS
+        // svg.append("text")
+        //   .attr("text-anchor", "end")
+        //   .attr("x", width/2 + 12)
+        //   .attr("y", height + margin.top + 14)
+        //   .text("time");
+        // svg.selectall("text").attr("stroke","#FFFFFF")
           // to draw the initial targets, will be overwritten when signal scheme is changed
           // the y value is defined by a position on the graph measured in pixels
-          let yVal = height/2
+          let positiveTarget = [
+            { x: 1, y: -1 },
+            { x: -1, y: -1 },
+        ];
+          let negativeTarget = [
+                    { x: 1, y: 1 },
+                    { x: -1, y: 1 },
+        ];
         svg.append('g')
           .selectAll("dot")
           .data(positiveTarget)
           .enter()
           .append("circle")
+            .attr("cy", function (d) { return y(d.y); } )
             .attr("cx", function (d) { return x(d.x); } )
-            .attr("cy", yVal)
             .attr("r", 2)
             .style("fill","#00FF00")
         svg.append('g')
@@ -71,8 +78,8 @@ function constellationDiagram_Baseband(){
             .data(negativeTarget)
             .enter()
             .append("circle")
+              .attr("cy", function (d) { return y(d.y); })
               .attr("cx", function (d) { return x(d.x); } )
-              .attr("cy", yVal)
               .attr("r", 2)
               .style("fill","#00FF00")
         svg.selectAll(".tick line").attr("stroke", "#FFFFFF")
@@ -82,22 +89,59 @@ function constellationDiagram_Baseband(){
 
   
       // START OF LOOPING CODE
-      let color = '#FF0000';
       let counter = 0;
       setInterval(() => {
       // console.log("1 second has passed");
       // const ebno = math.log10(math.abs(sig.sinr))
       const signalGainLinear = (10 ** (Math.abs(sig.gn)/10)) 
       const noisePowerLinear = (10 ** (Math.abs(sig.sinr - sig.gn)/10)) 
-      // const noisePower = .1
-  
-      // const variance = 5
+
       const variance = Math.sqrt(noisePowerLinear)
       
-      // console.log(sig.sinr)
-      // console.log(sinrLinear)
-      console.log(variance)
-      
+
+
+      let varPosTarget = [];
+      for (let i = 0; i < 32; i++) {
+        let xValue = 1 - (i * (2 / 31)); // Distribute 32 points evenly between 1 and -1
+        varPosTarget.push({ x: xValue, y: positiveTarget[0].y + randn_bm() * variance });
+      }
+      for (let i = 0; i < varPosTarget.length; i++) {
+        if (varPosTarget[i].y > 6) varPosTarget[i].y = 6
+        if (varPosTarget[i].y < -6) varPosTarget[i].y = -6
+      }
+      let varNegTarget = [];
+      for (let i = 0; i < 32; i++) {
+        let xValue = 1 - (i * (2 / 31)); // Distribute 32 points evenly between 1 and -1
+        varNegTarget.push({ x: xValue, y: negativeTarget[0].y + randn_bm() * variance });
+      }
+
+      for (let i = 0; i < varNegTarget.length; i++) {
+        
+
+        if (varNegTarget[i].y > 6) varNegTarget[i].y = 6
+        if (varNegTarget[i].y < -6) varNegTarget[i].y = -6
+      }
+
+      console.log(varPosTarget)
+
+      svg.append("path")
+      .datum(varPosTarget)
+      .attr("fill", "none")
+      .attr("stroke", "#FF0000")
+      .attr("stroke-width", 3)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.x) })
+        .y(function(d) { return y(d.y) })
+        )
+        svg.append("path")
+        .datum(varNegTarget)
+        .attr("fill", "none")
+        .attr("stroke", "#0000FF")
+        .attr("stroke-width", 3)
+        .attr("d", d3.line()
+          .x(function(d) { return x(d.x) })
+          .y(function(d) { return y(d.y) })
+          )
   
       // console.log(ebno);
         counter = counter + 1;
@@ -110,8 +154,8 @@ function constellationDiagram_Baseband(){
           .enter()
           .append("circle")
             .attr("cx", function (d) { return x(d.x); } )
-            .attr("cy",   yVal  )
-            .attr("r", 3)
+            .attr("cy", function (d) { return y(d.y); } )
+            .attr("r", 1)
             .style("fill","#00FF00")
           svg.append('g') 
             .selectAll("dot")
@@ -119,8 +163,8 @@ function constellationDiagram_Baseband(){
             .enter()
             .append("circle")
               .attr("cx", function (d) { return x(d.x); } )
-              .attr("cy",   yVal  )
-              .attr("r", 3)
+              .attr("cy", function (d) { return y(d.y); } )
+              .attr("r", 1)
               .style("fill","#00FF00")
           console.log("10 seconds has passed")
         }
@@ -128,37 +172,39 @@ function constellationDiagram_Baseband(){
         
         svg.append('g')
         .selectAll("dot")
-        .data(positiveTarget)
+        .data(varPosTarget)
         .enter()
         .append("circle")
-          .attr("cx", function (d) { 
+          .attr("cy", function (d) { 
             // console.log(d.x + randn_bm() * (1/ebno)**2)
             // creates a variable that can be edited if it goes out of bounds for x and y values
 
-            let xVal = d.x + randn_bm() * variance;
-            if(xVal<-12) xVal = -12
+            let yVal = d.y;
+            if(yVal<-6) yVal = -6
+            if(yVal>6) yVal = -6
             
-            return x(xVal); } )
-          .attr("cy", yVal )
-          .attr("r", 2)
+            return y(yVal); } )
+          .attr("cx", function (d) { return x(d.x); } )
+          .attr("r", 1)
           .style("fill",'#FF0000')
 
         svg.append('g')
           .selectAll("dot")
-          .data(negativeTarget)
+          .data(varNegTarget)
           .enter()
           .append("circle")
-            .attr("cx", function (d) { 
+            .attr("cy", function (d) { 
               // console.log(d.x + randn_bm() * (1/ebno)**2)
               // creates a variable that can be edited if it goes out of bounds for x and y values
   
-              let xVal = d.x + randn_bm() * variance;
-              if(xVal<-12) xVal = -12
+              let yVal = d.y ;
+              if(yVal<-6) yVal = -6
+              if(yVal>6) yVal = 6
 
               
-              return x(xVal); } )
-            .attr("cy", yVal )
-            .attr("r", 2)
+              return y(yVal); } )
+            .attr("cx", function (d) { return x(d.x); } )
+            .attr("r", 1)
             .style("fill",'#0000FF')
         svg.append('g')
           .selectAll("dot")
@@ -166,7 +212,7 @@ function constellationDiagram_Baseband(){
           .enter()
           .append("circle")
             .attr("cx", function (d) { return x(d.x); } )
-            .attr("cy", yVal )
+            .attr("cy", function (d) { return y(d.y); } )
             .attr("r", 3)
             .style("fill","#00FF00")
         svg.append('g')
@@ -175,7 +221,7 @@ function constellationDiagram_Baseband(){
             .enter()
             .append("circle")
               .attr("cx", function (d) { return x(d.x); } )
-              .attr("cy", yVal )
+              .attr("cy", function (d) { return y(d.y); } )
               .attr("r", 3)
               .style("fill","#00FF00")
             }
@@ -184,27 +230,55 @@ function constellationDiagram_Baseband(){
     }, 1000);
   
   
+
+
+
+
+
     sig.onChange("gn", update_constellation);
   
     function update_constellation(){
-      let NewX = sig.gn
+      let NewY = sig.gn
       positiveTarget = [
-        { x: NewX, y: -1 },
+        { x: 1, y: NewY },
+        { x: -1, y: NewY },
       ]
       negativeTarget = [
-        { x: -NewX, y: -1 },
+        { x: 1, y: -NewY },
+        { x: -1, y: -NewY },
       ]
   
     // delete all dots
     d3.select("#constellationParent").selectAll("circle").remove();
-  
+    d3.select("#constellationParent").selectAll("path").remove();
+
+
+    // svg.append("path")
+    // .datum(positiveTarget)
+    // .attr("fill", "none")
+    // .attr("stroke", "#00FF00")
+    // .attr("stroke-width", 5)
+    // .attr("d", d3.line()
+    //   .x(function(d) { return x(d.x) })
+    //   .y(function(d) { return y(d.y) })
+    //   )
+    //   svg.append("path")
+    //   .datum(negativeTarget)
+    //   .attr("fill", "none")
+    //   .attr("stroke", "#00FF00")
+    //   .attr("stroke-width", 5)
+    //   .attr("d", d3.line()
+    //     .x(function(d) { return x(d.x) })
+    //     .y(function(d) { return y(d.y) })
+    //     )
+
     svg.append('g')
       .selectAll("dot")
       .data(positiveTarget)
       .enter()
       .append("circle")
+        .attr("cy", function (d) { return y(d.y); } )
         .attr("cx", function (d) { return x(d.x); } )
-        .attr("cy", yVal )
         .attr("r", 3)
         .style("fill","#00FF00")
     svg.append('g')
@@ -212,9 +286,9 @@ function constellationDiagram_Baseband(){
         .data(negativeTarget)
         .enter()
         .append("circle")
+          .attr("cy", function (d) { return y(d.y); } ) 
           .attr("cx", function (d) { return x(d.x); } )
-          .attr("cy", yVal )
-          .attr("r", 3)
+          .attr("r", 1)
           .style("fill","#00FF00")
     }
 
