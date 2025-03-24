@@ -16,10 +16,9 @@
 
 
 <div id="voltageSlider" style="margin-left: 1%; margin-top:2%; width: 100%;"></div>
-<div id="noiseSlider" style="margin-left: 1%; margin-top:2%; width: 100%"></div>
+<div id="noiseSlider" style="margin-left: 1%; margin-top:2%; width: 100%;"></div>
 
 <button onclick="buttonPressedClearPoints()">clear message</button> 
-
 <div style="display:inline-flex;">
   <span style="font-size: 18px; margin-left: 8px;margin-right: 8px;">Differential Mode</span>
   <label class="switch">
@@ -27,7 +26,6 @@
     <span class="slider round"></span>
   </label>
 </div>
-
 <div id="constellationParent" style="width: 100%; height: 100%;"></div>
 
 
@@ -41,14 +39,14 @@
 var sig = Signal(JSON.parse(JSON.stringify(conf.signal_multi)), '', {
     gn_init: .1, // dB
     gn_min: 0, // volts
-    gn_max: 5, // volts
+    gn_max: 10, // volts
     mcs_init: 1, // array index int
     differentialMode: false,
   });
   var noise = Signal(JSON.parse(JSON.stringify(conf.signal_multi)), '', {
     gn_init: 0, // dB
     gn_min: 0,
-    gn_max: 35,
+    gn_max: 50,
   });
   noise.gn = 0;
 
@@ -138,7 +136,7 @@ noiseSlider = document.createElement("INPUT");
         noise["gn"] = parseValue(noiseSlider.value);
       };
       var outputUnitsCallback = function (noise, val) {
-         return d3.format(".2f")(val) + " dB/Hz";
+         return d3.format(".2f")(val);
       };
 
   
@@ -161,7 +159,7 @@ constellationDiagram_Baseband()
  // use the clear all circles button
 function buttonPressedClearPoints(){
   d3.select("#constellationParent").selectAll("circle").remove();
-  d3.select("#constellationParent").selectAll("path").remove();
+
 }
 function differentialMode(){
   if(document.getElementById("differentialMode").checked){
