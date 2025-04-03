@@ -189,22 +189,22 @@ function constellationDiagram_Baseband(){
     function update_constellation(){
       let NewX = sig.gn
 
-      if(sig.differentialMode){
-        negativeTarget = [
-          { x: -NewX, y: -1 },
-        ]
-      } else {
-        negativeTarget = [
-          { x: 0, y: -1 },
-        ]
-      }
+      // if(sig.differentialMode){
+      //   negativeTarget = [
+      //     { x: -NewX, y: -1 },
+      //   ]
+      // } else {
+      //   negativeTarget = [
+      //     { x: 0, y: -1 },
+      //   ]
+      // }
 
       positiveTarget = [
         { x: NewX, y: -1 },
       ]
-      // negativeTarget = [
-      //   { x: -NewX, y: -1 },
-      // ]
+      negativeTarget = [
+        { x: -NewX, y: -1 },
+      ]
   
     // delete all dots
     d3.select("#constellationParent").selectAll("circle").remove();
