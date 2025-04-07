@@ -63,19 +63,78 @@ function constellationDiagram(){
           .attr("r", 1.5)
           .style("fill","#1b9e77")
   
-  
+        // Create a container to display BER
+        let berDisplay = document.createElement("div");
+        berDisplay.id = "berDisplay";
+        berDisplay.style.marginTop = "10px";
+        berDisplay.style.fontSize = "14px";
+        berDisplay.textContent = "Bit Errr Rate: 0";
+        document.getElementById("constellationParent").appendChild(berDisplay);
+
         // console.log(sig)
 
         // UNCOMMENT out to add a slider
-        Slider(noise, 'gn', null, "noiseSlider");
-        Label(sig, 'sinr', {
-        prefix: "Signal-to-Noise Ratio: SNR = "
-        }, "noiseSlider");
+        // Slider(noise, 'gn', null, "noiseSlider");
+        // Label(sig, 'sinr', {
+        // prefix: "Signal-to-Noise Ratio: SNR = "
+        // }, "noiseSlider");
+      
+
+
+        let messageRate = 1;
+
+      messageRateSlider = document.createElement("INPUT");
+
+      messageRateSlider.type = "range";
+      messageRateSlider.min = 1; 
+      messageRateSlider.max = 10
+      messageRateSlider.step = 1
+      messageRateSlider.value = 1
+      let p = document.createElement("p");
+      p.appendChild(messageRateSlider);
+      // I'm sure I could have made this better but I didn't 
+      document.getElementById("rateSlider").appendChild(p);
+
+      // below sets up the label on the left of the slider
+      let label = document.createElement("label");
+      label.setAttribute("for", messageRateSlider.id);
+      label.appendChild(document.createTextNode("Message Rate"));
+
+      messageRateSlider.parentNode.prepend(label);
+  
+      // below sets up the output value on the right of the slider
+      let output = document.createElement("output");
+      output.setAttribute("for", messageRateSlider.id);
+      messageRateSlider._output = output;
+      messageRateSlider.parentNode.append(output);
+      
+      // below tells css to make the slider look like the sliders were use to 
+      messageRateSlider.className = "slider_bw";
+  
+      // we will use floats on the output
+      var parseValue = parseFloat;
+  
+      messageRateSlider.oninput = function () {
+        // Set the varying parameter.  For example: sig.freq
+        // This calls the parameter setter.
+        messageRate = parseValue(messageRateSlider.value);
+      };
+      var outputUnitsCallback = function (val) {
+        return d3.format("d")(val) + " messages/sec";
+      };
+
+  
+      messageRateSlider.addEventListener("input", function () {
+        messageRate = messageRateSlider.value;
+        output.textContent = outputUnitsCallback(messageRate);
+      })
   
       // console.log(sig.sinr)
   
       // START OF LOOPING CODE
       let counter = 0;
+      let sentMessages = 0;
+      let messageErrors = 0;
       setInterval(() => {
       // console.log("1 second has passed");
       // const ebno = math.log10(math.abs(sig.sinr))
@@ -87,11 +146,11 @@ function constellationDiagram(){
 
 
     
-
+        
 
       // console.log(ebno);
         counter = counter + 1;
-        if (counter == 24){
+        if (counter == 9){
           counter = 0;
           d3.select("#constellationParent").selectAll("circle").remove();
           svg.append('g')
@@ -105,7 +164,8 @@ function constellationDiagram(){
             .style("fill","#1b9e77")
           console.log("10 seconds has passed")
         }
-      for (let i = 0; i < 99; i++) {
+      for (let i = 0; i < messageRate; i++) {
+        sentMessages = sentMessages + 1;
         // creates a variable that can be edited if it goes out of bounds for x and y values
         let translatedTargets = constellationTargets.map(point => ({
           x: point.x + variance * randn_bm(),
@@ -121,7 +181,8 @@ function constellationDiagram(){
           let = printObject = [translatedTargets[i]]
 
           if ( (xErrorDist > distance) || (yErrorDist > distance) ){
-            // console.log("I am called!")
+            console.log("Error!!!")
+            messageErrors = messageErrors + 1;
             svg.append('g')
             .selectAll("dot")
             .data(printObject)
@@ -182,7 +243,16 @@ function constellationDiagram(){
             .attr("r", 1.5)
             .style("fill","#1b9e77")
             }
+
+        console.log("Sent Messages: " + sentMessages)
+        console.log("Message Errors: " + messageErrors)
+        console.log("Error Rate: " + messageErrors/sentMessages)
         // value below is the loop time in miliseconds
+        sig.BER = messageErrors/sentMessages;
+        console.log("Bit Error Rate: " + sig.BER);
+
+        // Update the BER display
+        berDisplay.textContent = `Bit Error Rate: ${sig.BER.toFixed(6)}`;
     }, 1000);
   
   

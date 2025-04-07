@@ -19,7 +19,7 @@
 //      or null and a HTML <p> and <input> range element are created
 //      and appended to the body.
 
-function Slider(sig, parameter, n = null, append_to_id=null) {
+function Slider(sig, parameter, n = null, append_to_id=null, label = null) {
   {
     let gotPar = false;
 
@@ -83,7 +83,7 @@ function Slider(sig, parameter, n = null, append_to_id=null) {
     labelText,
     par,
     unitScale,
-    unit /*string or callback that returns a string*/
+    unit, /*string or callback that returns a string*/
   ) {
     if (sig.name.length > 0) labelText = sig.name + " " + labelText;
 
@@ -150,19 +150,36 @@ function Slider(sig, parameter, n = null, append_to_id=null) {
 
     //console.log("Made slider id=" + n.id + " :\n" + n.parentNode.innerHTML);
   }
-
+  if(label != null) label_Text = label;
   switch (parameter) {
     case "freq": // signal frequency - input range slider
-      makeSlider(sig, n, "Frequency", parameter, 0.1, "Hz");
+      // makeSlider(sig, n, "Frequency", parameter, 0.1, "Hz");
+      if(label != null) {
+        label_Text = label;
+      } else {
+        label_Text = "Frequency";
+      }
+      makeSlider(sig, n, label_Text, "gn", 0.1, " dB/Hz");
       break;
     case "bw": // signal bandwidth - input range slider
-      makeSlider(sig, n, "Bandwidth", parameter, 1.0, "Hz");
+      if(label != null) {
+        label_Text = label;
+      } else {
+        label_Text = "Bandwidth";
+      }
+      makeSlider(sig, n, label_Text, parameter, 1.0, "Hz");
       break;
     case "gn": // signal gain - input range slider
-      makeSlider(sig, n, "Gain", parameter, 1.0, "dB");
+      // makeSlider(sig, n, "Gain", parameter, 1.0, "dB");
+      
       break;
     case "mcs": // modulation scheme - input range slider
-      makeSlider(sig, n, "Mod Code", parameter, 1.0, function (sig, val) {
+      if(label != null) {
+        label_Text = label;
+      } else {
+        label_Text = "Mod Code";
+      }
+      makeSlider(sig, n, label_Text, parameter, 1.0, function (sig, val) {
         //console.log("val=" + val);
         return (
             conf.schemes[val].name + " (" +
@@ -171,13 +188,20 @@ function Slider(sig, parameter, n = null, append_to_id=null) {
       });
       break;
     case "noise": // noise floor 'volume' - emulated by gain value
-      makeSlider(sig, n, "Noise", "gn", 0.1, " dB/Hz");
+      if(label != null) {
+        label_Text = label;
+      } else {
+        label_Text = "Noise";
+      }
+      makeSlider(sig, n, label_Text, "gn", 0.1, " dB/Hz");
       break;
     default:
       // This should not happen.
       console.log("Cannot setup slider of kind name=" + parameter);
       break;
   }
+  // makeSlider(sig, n, label_Text, "gn", 0.1, " dB/Hz");
+
 }
 
 Slider.nodeCount = 0;

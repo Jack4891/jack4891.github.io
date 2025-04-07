@@ -1,4 +1,26 @@
 /* TODO: only apply to axis labels? */
+.tab {
+  display: flex;
+  background-color: #d3d3d3; /* Matches grey background */
+  border-bottom: 1px solid #d3d3d3;
+}
+.tab button {
+  background-color: #d3d3d3; /* Matches grey background */
+  border: none;
+  outline: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  flex-grow: 1; /* Distribute tabs evenly across the screen */
+  text-align: center; /* Center text inside each tab */
+}
+.tab button:hover {
+  background-color: #bbb; /* Slightly darker grey for hover effect */
+}
+.tab button.active {
+  background-color: #1a7cd2; /* Active tab color remains unchanged */
+}
+
 svg * { font: 12px Arial;
   color: white;
   line : white;
