@@ -170,7 +170,13 @@ function Slider(sig, parameter, n = null, append_to_id=null, label = null) {
       makeSlider(sig, n, label_Text, parameter, 1.0, "Hz");
       break;
     case "gn": // signal gain - input range slider
-      // makeSlider(sig, n, "Gain", parameter, 1.0, "dB");
+        if(label != null) {
+          label_Text = label;
+        } else {
+          label_Text = "Gain";
+        }  
+    
+        makeSlider(sig, n, label_Text, parameter, 1.0, "dB");
       
       break;
     case "mcs": // modulation scheme - input range slider

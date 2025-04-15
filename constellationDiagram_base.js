@@ -1,3 +1,8 @@
+// Declare global variables
+let sentMessages = 0;
+let messageErrors = 0;
+let bpskFlag = 0;
+
 function constellationDiagram(){
     document.getElementById("constellationParent").innerHTML = "";
     let distance = 2/2;
@@ -81,13 +86,13 @@ function constellationDiagram(){
       
 
 
-        let messageRate = 1;
+        let messageRate = 50;
 
       messageRateSlider = document.createElement("INPUT");
 
       messageRateSlider.type = "range";
       messageRateSlider.min = 1; 
-      messageRateSlider.max = 10
+      messageRateSlider.max = 500;
       messageRateSlider.step = 1
       messageRateSlider.value = 1
       let p = document.createElement("p");
@@ -133,16 +138,50 @@ function constellationDiagram(){
   
       // START OF LOOPING CODE
       let counter = 0;
-      let sentMessages = 0;
-      let messageErrors = 0;
+      messageRateSlider.value = messageRate
+
+      
       setInterval(() => {
+        if (sig.mcs == 0) {
+          bpskFlag = 0;
+        } else {
+          bpskFlag = 1;
+        }
+
+
+        let scaleFactor = 0
+        if(sig.mcs>1 && sig.mcs <5 ){
+          // 4 QAM
+          scaleFactor = 2
+      } else if(sig.mcs <2){
+          // BPSK
+        bpskFlag = true;
+        scaleFactor = 2
+      } else if (sig.mcs >=5 && sig.mcs <7 ){
+          // 16 QAM
+          scaleFactor = .707
+      } else if (sig.mcs == 7){
+          // 32 QAM
+          scaleFactor = .408
+      } else if(sig.mcs ==8){
+          // 64 QAM
+          scaleFactor = .353
+      } else if (sig.mcs == 9){
+          // 128 QAM
+          scaleFactor = .289
+      } else if(sig.mcs >9) {
+          // 256 QAM
+          scaleFactor = .25
+      }
       // console.log("1 second has passed");
       // const ebno = math.log10(math.abs(sig.sinr))
-      const ebno = (10 ** (sig.sinr/10)) 
+      const ebno = (10 ** (sig.sinr/20)) 
       const noisePower = 1/ebno
       // const noisePower = .1
+      console.log(ebno)
   
-      const variance = Math.sqrt(noisePower) 
+      const variance = scaleFactor* Math.sqrt(noisePower)
+      console.log(variance)
 
 
     
@@ -150,7 +189,7 @@ function constellationDiagram(){
 
       // console.log(ebno);
         counter = counter + 1;
-        if (counter == 9){
+        if (counter == 3){
           counter = 0;
           d3.select("#constellationParent").selectAll("circle").remove();
           svg.append('g')
@@ -168,8 +207,8 @@ function constellationDiagram(){
         sentMessages = sentMessages + 1;
         // creates a variable that can be edited if it goes out of bounds for x and y values
         let translatedTargets = constellationTargets.map(point => ({
-          x: point.x + variance * randn_bm(),
-          y: point.y + variance * randn_bm()
+          x: point.x  +(2)*variance*randn_bm(),
+          y: point.y  +(2)*variance*randn_bm()
         }));
         for (let i = 0; i < constellationTargets.length; i++) {
           // console.log(translatedTargets[i])
@@ -244,12 +283,12 @@ function constellationDiagram(){
             .style("fill","#1b9e77")
             }
 
-        console.log("Sent Messages: " + sentMessages)
-        console.log("Message Errors: " + messageErrors)
-        console.log("Error Rate: " + messageErrors/sentMessages)
+        // console.log("Sent Messages: " + sentMessages)
+        // console.log("Message Errors: " + messageErrors)
+        // console.log("Error Rate: " + messageErrors/sentMessages)
         // value below is the loop time in miliseconds
         sig.BER = messageErrors/sentMessages;
-        console.log("Bit Error Rate: " + sig.BER);
+        // console.log("Bit Error Rate: " + sig.BER);
 
         // Update the BER display
         berDisplay.textContent = `Bit Error Rate: ${sig.BER.toFixed(6)}`;
@@ -315,7 +354,17 @@ function constellationDiagram(){
       while(v === 0) v = Math.random();
       let num = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
       num = num / 10.0 + 0.5; // Translate to 0 -> 1
-      if (num > 1 || num < 0) return randn_bm() // resample between 0 and 1
+      // if (num > 1 || num < 0) return randn_bm() // resample between 0 and 1
        num = num - 0.5; // added to center around 0
       return num
     }
+
+
+     // use the clear all circles button
+function buttonPressedClearPoints(){
+  d3.select("#constellationParent").selectAll("circle").remove();
+  sig.BER = 0;
+  sentMessages = 0;
+  messageErrors = 0;  
+
+}
