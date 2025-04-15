@@ -1,10 +1,14 @@
-// Declare global variables
-let sentMessages = 0;
+///////////////////////////////////////////////////////////////////
+// global variables
+///////////////////////////////////////////////////////////////////
 let messageErrors = 0;
 let bpskFlag = 0;
 
 function constellationDiagram(){
     document.getElementById("constellationParent").innerHTML = "";
+///////////////////////////////////////////////////////////////////
+// local variables 
+///////////////////////////////////////////////////////////////////
     let distance = 2/2;
     // delcared for 16 qam as signal is also declared as 16 qam
     let constellationTargets = [
@@ -76,23 +80,26 @@ function constellationDiagram(){
         berDisplay.textContent = "Bit Errr Rate: 0";
         document.getElementById("constellationParent").appendChild(berDisplay);
 
-        // console.log(sig)
-
-        // UNCOMMENT out to add a slider
+///////////////////////////////////////////////////////////////////
+// UNCOMMENT out to add a slider
+///////////////////////////////////////////////////////////////////
         // Slider(noise, 'gn', null, "noiseSlider");
         // Label(sig, 'sinr', {
         // prefix: "Signal-to-Noise Ratio: SNR = "
         // }, "noiseSlider");
       
 
-
-        let messageRate = 50;
+///////////////////////////////////////////////////////////////////
+// message rate slider begin
+///////////////////////////////////////////////////////////////////
+      let sentMessages = 0;
+      let messageRate = 10; // default message rate
 
       messageRateSlider = document.createElement("INPUT");
 
       messageRateSlider.type = "range";
       messageRateSlider.min = 1; 
-      messageRateSlider.max = 500;
+      messageRateSlider.max = 25;
       messageRateSlider.step = 1
       messageRateSlider.value = 1
       let p = document.createElement("p");
@@ -133,22 +140,26 @@ function constellationDiagram(){
         messageRate = messageRateSlider.value;
         output.textContent = outputUnitsCallback(messageRate);
       })
-  
-      // console.log(sig.sinr)
-  
-      // START OF LOOPING CODE
-      let counter = 0;
-      messageRateSlider.value = messageRate
+///////////////////////////////////////////////////////////////////
+// message rate slider end
+///////////////////////////////////////////////////////////////////  
 
-      
+
+      let counter = 0;
+      messageRateSlider.value = messageRate+1 - 1
+
+///////////////////////////////////////////////////////////////////
+// looping code begin
+///////////////////////////////////////////////////////////////////
       setInterval(() => {
+        // bpsk flag local
         if (sig.mcs == 0) {
           bpskFlag = 0;
         } else {
           bpskFlag = 1;
         }
 
-
+        // scale factor local 
         let scaleFactor = 0
         if(sig.mcs>1 && sig.mcs <5 ){
           // 4 QAM
@@ -175,21 +186,29 @@ function constellationDiagram(){
       }
       // console.log("1 second has passed");
       // const ebno = math.log10(math.abs(sig.sinr))
+
+///////////////////////////////////////////////////////////////////
+// nerd alert begin
+// this is the math behind the variance calculation see oneNote for further details
+///////////////////////////////////////////////////////////////////
       const ebno = (10 ** (sig.sinr/20)) 
       const noisePower = 1/ebno
       // const noisePower = .1
-      console.log(ebno)
+      // console.log(ebno)
   
-      const variance = scaleFactor* Math.sqrt(noisePower)
-      console.log(variance)
-
+      const variance = 2*scaleFactor* Math.sqrt(noisePower)
+      // console.log(variance)
+///////////////////////////////////////////////////////////////////
+// nerd alert end
+///////////////////////////////////////////////////////////////////
 
     
-        
-
       // console.log(ebno);
         counter = counter + 1;
-        if (counter == 3){
+///////////////////////////////////////////////////////////////////
+// erases the dots every 10 plots
+///////////////////////////////////////////////////////////////////
+        if (counter == 9){
           counter = 0;
           d3.select("#constellationParent").selectAll("circle").remove();
           svg.append('g')
@@ -207,8 +226,8 @@ function constellationDiagram(){
         sentMessages = sentMessages + 1;
         // creates a variable that can be edited if it goes out of bounds for x and y values
         let translatedTargets = constellationTargets.map(point => ({
-          x: point.x  +(2)*variance*randn_bm(),
-          y: point.y  +(2)*variance*randn_bm()
+          x: point.x  +variance*randn_bm(),
+          y: point.y  +variance*randn_bm()
         }));
         for (let i = 0; i < constellationTargets.length; i++) {
           // console.log(translatedTargets[i])
@@ -347,7 +366,12 @@ function constellationDiagram(){
   
   // helper functions
 
-  // }
+  // } <- I have no idea why this is here or where it's opening friend is
+
+/////////////////////////////////////////////////////////////////////
+// edited version of box-muller transform from https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform
+// edited by allowing to go beyond 0 and 1
+///////////////////////////////////////////////////////////////////
   function randn_bm() {
       let u = 0, v = 0;
       while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
@@ -360,7 +384,7 @@ function constellationDiagram(){
     }
 
 
-     // use the clear all circles button
+// use the clear all circles button and reset BER calc
 function buttonPressedClearPoints(){
   d3.select("#constellationParent").selectAll("circle").remove();
   sig.BER = 0;

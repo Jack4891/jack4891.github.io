@@ -11,11 +11,15 @@
 <script src=constellationDiagram_base.js></script>
 
 <body>
+<!-- back to index link  -->
+ <!-- TODO: made a button? -->
   <a href="index.html" style="margin-left: 1%; margin-top: 1%; display: block;">Back to Index</a>
 
-  
+   <!-- likely redundant will clean up later -->
 <!-- <div id="modCodeSlider" style="margin-left: 1%; margin-top:2%; width: 100%;"></div> -->
-     <div id="JohnDropdown" style="margin-left: 1%; margin-top: 1%; margin-bottom: 3%; display: block;">
+     
+ <!-- creates the dropdown, Variable naming is my passion -->
+    <div id="JohnDropdown" style="margin-left: 1%; margin-top: 1%; margin-bottom: 3%; display: block;">
       <select style="width: 150px; height: 40px; font-size: 16px;">
         <option value="BPSK">BPSK</option>
         <option value="4QAM">4-QAM</option>
@@ -38,7 +42,9 @@
 <script>
 
 
-
+//////////////////////////////////////
+// declaration of signal variable should be global
+//////////////////////////////////////
 var sig = Signal(JSON.parse(JSON.stringify(conf.signal_multi)), '', {
     gn_init: 5, // dB
     gn_min: 0, // volts
@@ -46,25 +52,48 @@ var sig = Signal(JSON.parse(JSON.stringify(conf.signal_multi)), '', {
     mcs_init: 0, // array index int
     BER: 0, // BER
   });
+
+//////////////////////////////////////
+// declaration of noise variable should be global
+//////////////////////////////////////
   var noise = Signal(JSON.parse(JSON.stringify(conf.signal_multi)), '', {
     gn_init: 0, // dB
     gn_min: -30,
     gn_max: 30,
   });
   noise.gn = 0;
+
+  //////////////////////////////////////
+// Below might be redundant
+//////////////////////////////////////
 // Slider(sig, 'mcs', null, "modCodeSlider");
 // Slider(sig, 'gn', null, "gainSlider","Energy Per Bit ")
+
+//////////////////////////////////////
+// gain slider last input is the label on the left
+//////////////////////////////////////
 Slider(sig, 'gn', null, 'gainSlider','Eb/N0 (dB)');
 
+//////////////////////////////////////
+// Below might be redundant
+//////////////////////////////////////
 // Slider(noise, 'noise', null, "noiseSlider");
-Label(sig, 'sinr', {
-prefix: "Signal-to-Noise Ratio: SNR = "
-}, "gainSlider");
+
+
+//////////////////////////////////////
+// I could probably delete below later
+//////////////////////////////////////
+// Label(sig, 'sinr', {
+// prefix: "Signal-to-Noise Ratio: SNR = "
+// }, "gainSlider");
 
 
 
 
-
+//////////////////////////////////////
+// generates the constellation diagram 
+// TODO: make this a able to be moved around manually
+//////////////////////////////////////
 constellationDiagram()
 
 
@@ -72,15 +101,21 @@ constellationDiagram()
 
 
 
-
+//////////////////////////////////////
+// deleting soon now part of the constellation diagram javascript
+//////////////////////////////////////
 // }
 //  // use the clear all circles button
 // function buttonPressedClearPoints(){
 //   d3.select("#constellationParent").selectAll("circle").remove();
-
-
 // }
 
+//////////////////////////////////////
+// dropdown menu for selecting modulation scheme
+// ^ above written by github copilot 
+// TODO: move to the constellation diagram javascript file
+// ^ above also made by github copilot but edited by me
+//////////////////////////////////////
 const dropdown = document.getElementById("JohnDropdown").querySelector("select");
 console.log(dropdown);
 dropdown.addEventListener("change", function() {
