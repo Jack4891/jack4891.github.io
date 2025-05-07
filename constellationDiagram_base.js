@@ -2,6 +2,8 @@
 let sentMessages = 0;
 let messageErrors = 0;
 let bpskFlag = 0;
+let frozen = false;
+let refreshRate = 1000;
 
 function constellationDiagram(){
     document.getElementById("constellationParent").innerHTML = "";
@@ -67,6 +69,20 @@ function constellationDiagram(){
           .attr("cy", function (d) { return y(d.y); } )
           .attr("r", 1.5)
           .style("fill","#1b9e77")
+
+
+          // Add a button to the SVG
+      svg.append("foreignObject")
+        .attr("x", width - 60) // Position the button near the top-right corner
+        .attr("y", 10)
+        .attr("width", 80)
+        .attr("height", 30)
+        .append("xhtml:button")
+        .text("freeze")
+        .style("font-size", "12px")
+        .style("padding", "5px")
+        .style("cursor", "pointer")
+        .on("click", freeze);
   
         // Create a container to display BER
         let berDisplay = document.createElement("div");
@@ -142,6 +158,7 @@ function constellationDiagram(){
 
       
       setInterval(() => {
+        if(!frozen){
         if (sig.mcs == 0) {
           bpskFlag = 0;
         } else {
@@ -189,7 +206,7 @@ function constellationDiagram(){
 
       // console.log(ebno);
         counter = counter + 1;
-        if (counter == 3){
+        if (counter == 9){
           counter = 0;
           d3.select("#constellationParent").selectAll("circle").remove();
           svg.append('g')
@@ -292,7 +309,8 @@ function constellationDiagram(){
 
         // Update the BER display
         berDisplay.textContent = `Bit Error Rate: ${sig.BER.toFixed(6)}`;
-    }, 1000);
+          }
+    }, refreshRate);
   
   
     sig.onChange("mcs", update_constellation);
@@ -367,4 +385,13 @@ function buttonPressedClearPoints(){
   sentMessages = 0;
   messageErrors = 0;  
 
+}
+
+function freeze() {
+  frozen = !frozen;
+  console.log(frozen);
+
+  // Update the button text
+  const button = d3.select("#constellationParent button");
+  button.text(frozen ? "unfreeze" : "freeze");
 }
